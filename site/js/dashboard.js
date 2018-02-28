@@ -115,7 +115,7 @@
   Dashboard.Poller = function(kinesis, map, console) {
     const streamName = '1090';
     const shardIteratorType = 'LATEST';
-    const pollFrequency = 1000;
+    const pollFrequency = 500;
 
     return {
       poll: function() {
