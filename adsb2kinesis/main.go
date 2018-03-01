@@ -66,7 +66,8 @@ func main() {
 }
 
 func poll() []Aircraft {
-	aircraft := []Aircraft{}
+	var aircraft []Aircraft
+
 	resp, err := http.Get(dump1090Endpoint)
 
 	if err != nil {
