@@ -112,88 +112,14 @@
     }
   }
 
-  Dashboard.Poller = function(kinesis, map, console) {
-    const streamName = '1090';
-    const shardIteratorType = 'LATEST';
-    const pollFrequency = 500;
-
-    return {
-      poll: function() {
-        return describeStream(streamName)
-          .then((data) => data.StreamDescription.Shards.map((shard) => shard.ShardId))
-          .then((shardIds) => getShardIterators(shardIds))
-          .then((data) => data.map((shardIterator) => shardIterator.ShardIterator))
-          .then((shardIteratorIds) => getRecords(shardIteratorIds))
-          .catch(console.error);
-      }
-    };
-
-    function describeStream(streamName) {
-      const params = {
-        StreamName: streamName,
-      };
-
-      return kinesis.describeStream(params).promise();
-    }
-
-    function getShardIterators(shardIds) {
-      const iterators = shardIds.map(function(shardId) {
-        const params = {
-          ShardId: shardId,
-          ShardIteratorType: shardIteratorType,
-          StreamName: streamName,
-        };
-
-        return kinesis.getShardIterator(params).promise();
-      });
-
-      return Promise.all(iterators);
-    }
-
-    function getRecords(shardIteratorIds) {
-      const recordSets = shardIteratorIds.map(function(shardIteratorId) {
-        const params = {
-          ShardIterator: shardIteratorId,
-        };
-
-        return kinesis.getRecords(params).promise();
-      });
-
-      return Promise.all(recordSets)
-        .then((recordSets) => update(recordSets))
-        .then((recordSets) => recordSets.map((records) => records.NextShardIterator))
-        .then((shardIteratorIds) => setTimeout(() => getRecords(shardIteratorIds), pollFrequency))
-        .catch(function(err) {
-          console.error(err);
-          setTimeout(() => getRecords(shardIteratorIds), pollFrequency);
-        });
-    }
-
-    function update(recordSets) {
-      recordSets.forEach(function(records) {
-        records.Records.forEach(function(record) {
-          const status = JSON.parse(record.Data);
-
-          map.update(status);
-        });
-      });
-
-      return recordSets;
-    }
-  }
-
   $(window).on('load', function() {
-    AWS.config.region = 'us-east-1';
-    AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-      IdentityPoolId: 'us-east-1:fa81df44-d624-4aa3-b6c6-8327f0313db2',
-    });
-
     const map = Dashboard.Map(L).init('map').render();
-    const kinesis = new AWS.Kinesis({
-      region: AWS.config.region,
-    });
+    const ws = new WebSocket('ws://planes.somanymachines.com:3000');
 
-    Dashboard.Poller(kinesis, map, console).poll()
-      .catch((err) => alert(err));
+    ws.onmessage = function(event) {
+      const statuses = JSON.parse(event.data);
+
+      statuses.forEach((status) => map.update(status));
+    }
   });
 })();
