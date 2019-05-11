@@ -12,5 +12,5 @@ ws.on('open', () => {
     ws.send(body);
   }
 
-	setInterval(poll, 500);
+  setInterval(poll, 500);
 });
