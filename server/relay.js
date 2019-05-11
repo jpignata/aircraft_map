@@ -1,15 +1,18 @@
 const WebSocket = require('ws');
 const fetch = require('node-fetch');
 
-const ws = new WebSocket(`ws://${process.env.DEST}`);
-const endpoint = `http://${process.env.SRC}/data.json`;
+const ws = new WebSocket(process.env.DEST);
 
 ws.on('open', () => {
   const poll = async function() {
-    const resp = await fetch(endpoint);
-    const body = await resp.text();
+    try {
+      const resp = await fetch(process.env.SRC);
+      const body = await resp.text();
 
-    ws.send(body);
+      ws.send(body);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   setInterval(poll, 500);

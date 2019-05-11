@@ -114,7 +114,7 @@
 
   $(window).on('load', function() {
     const map = Dashboard.Map(L).init('map').render();
-    const ws = new WebSocket('ws://planes.somanymachines.com:3000');
+    const ws = new WebSocket('wss://services.somanymachines.com/aircraft_map');
 
     ws.onmessage = function(event) {
       const statuses = JSON.parse(event.data);
