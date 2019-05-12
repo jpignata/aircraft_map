@@ -10,11 +10,11 @@ Interactive map that shows planes within radio range via ADS-B.
    repo but there are a couple of forks with extended functionality that may
    also work as well.
 
-   `dump1090 --interactive --net`
+   `dump1090 --net`
 
 1. Run `PORT=3000 server/index.js`
 
-1. Run `SRC=127.0.0.1:8080 DEST=127.0.0.1:3000 node server/relay.js`
+1. Run `SRC=http://127.0.0.1:8080/data.json DEST=ws://127.0.0.1:3000 node server/relay.js`
 
 1. `open index.html`
 
